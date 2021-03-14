@@ -32,7 +32,7 @@ namespace DSPSmoothSplitter
         public const string pluginName = "DSP Smooth Splitter";
         public const string pluginVersion = "1.0.0";
         new internal static ManualLogSource Logger;
-        new internal static BepInEx.Configuration.ConfigFile Config;
+        //new internal static BepInEx.Configuration.ConfigFile Config;
         Harmony harmony;
         public const int slotLength = 10;
         public const int cargoSlotLookAhead = 20 * slotLength;  // 15 isn't big enough
@@ -40,8 +40,7 @@ namespace DSPSmoothSplitter
         public void Awake()
         {
             Logger = base.Logger;  // "C:\Program Files (x86)\Steam\steamapps\common\Dyson Sphere Program\BepInEx\LogOutput.log"
-            Config = base.Config;  // "C:\Program Files (x86)\Steam\steamapps\common\Dyson Sphere Program\BepInEx\config\"
-            Config.SaveOnConfigSet = false;
+            //Config = base.Config;  // "C:\Program Files (x86)\Steam\steamapps\common\Dyson Sphere Program\BepInEx\config\"
 
             harmony = new Harmony(pluginGuid);
             harmony.PatchAll(typeof(DSPSmoothSplitter));
@@ -68,32 +67,10 @@ namespace DSPSmoothSplitter
             //    [4 + index + 5,6,7,8] is the cargo number
             //    [4 + index + 9] is byte.MaxValue
 
-            /*if (__instance.TryInsertCargo(4, 2000))
-            {
-                Array.Clear(__instance.buffer, 0, 10);
-                Logger.LogDebug("Splitter insert upgraded.");
-                __result = true;
-            }*/
-            // else do nothing
-
             List<int> cargoIds = new List<int>();
             int zeroCount = 0;
-            for (int index10 = 0; true; index10 += slotLength)
+            for (int index10 = 0; index10 < cargoSlotLookAhead; index10 += slotLength)
             {
-                if (index10 >= cargoSlotLookAhead)
-                {
-                    if (zeroCount == 0)
-                    {
-                        //Logger.LogDebug("Stop at artificial limit");
-                    }
-                    else if (zeroCount > slotLength)
-                        Logger.LogDebug("Stop at artificial limit.  HAVE SPACE.");
-                    else
-                    {
-                        //Logger.LogDebug($"Stop at artificial limit with {zeroCount} zeros");
-                    }
-                    break;
-                }
                 if (__instance.buffer[index10] == 0)
                 {
                     for (; index10 < __instance.bufferLength && __instance.buffer[index10] == 0; ++index10)
@@ -112,54 +89,21 @@ namespace DSPSmoothSplitter
                             {
                                 Logger.LogError($"Splitter insert upgraded error. index10={index10}, index={index}");
                             }
-                            else
-                            {
-                                Logger.LogMessage($"Splitter insert upgraded. index10={index10}, index={index}");
-                            }
                             __result = true;
                             return;
                         }
                     }
                 }
-                if (index10 + 9 >= __instance.bufferLength)
+
+                if (index10 + 9 >= __instance.bufferLength ||
+                    __instance.buffer[index10 + 0] != 246 ||
+                    __instance.buffer[index10 + 1] != 247 ||
+                    __instance.buffer[index10 + 2] != 248 ||
+                    __instance.buffer[index10 + 3] != 249 ||
+                    __instance.buffer[index10 + 4] != 250 ||
+                    __instance.buffer[index10 + 9] != byte.MaxValue)
                 {
-                    Logger.LogDebug("Short buffer");
-                    break;
-                }
-                /*if (__instance.buffer[index10 + 9] == 0)
-                {
-                    Logger.LogDebug($"[{index10} + 9] is 0 showing the slot is empty");
-                    break;
-                }*/
-                if (__instance.buffer[index10 + 0] != 246)
-                {
-                    Logger.LogDebug($"[{index10} + 0] not 246 = {__instance.buffer[index10 + 0]},{__instance.buffer[index10 + 1]},{__instance.buffer[index10 + 2]},{__instance.buffer[index10 + 3]},{__instance.buffer[index10 + 4]},{__instance.buffer[index10 + 5]},{__instance.buffer[index10 + 6]},{__instance.buffer[index10 + 7]},{__instance.buffer[index10 + 8]},{__instance.buffer[index10 + 9]}");
-                    break;
-                }
-                if (__instance.buffer[index10 + 1] != 247)
-                {
-                    Logger.LogDebug($"[{index10} + 1] not 247");
-                    break;
-                }
-                if (__instance.buffer[index10 + 2] != 248)
-                {
-                    Logger.LogDebug($"[{index10} + 2] not 248");
-                    break;
-                }
-                if (__instance.buffer[index10 + 3] != 249)
-                {
-                    Logger.LogDebug($"[{index10} + 3] not 249");
-                    break;
-                }
-                if (__instance.buffer[index10 + 4] != 250)
-                {
-                    Logger.LogDebug($"[{index10} + 4] not 250");
-                    break;
-                }
-                if (__instance.buffer[index10 + 9] != byte.MaxValue)
-                {
-                    Logger.LogDebug($"[{index10} + 9] not {byte.MaxValue}");
-                    break;
+                    return;
                 }
 
                 int cargoId_extract = (int)
