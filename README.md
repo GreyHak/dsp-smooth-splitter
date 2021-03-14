@@ -2,7 +2,11 @@
 
 **DSP Smooth Splitter** is a mod for the Unity game Dyson Sphere Program developed by Youthcat Studio and published by Gamera Game.  The game is available on [here](https://store.steampowered.com/app/1366540/Dyson_Sphere_Program/).
 
-Smooths out the priority output of the Splitter.  Have you ever had a two inputs and two outputs where the input was greater than the priority output, and the priority output belt wasn't full?  If you have, and this bothers you, this mod is for you.
+Smooths out the priority output of the Splitter.  Have you ever had a two inputs and two outputs where the input was greater than the priority output, and the priority output belt wasn't full?  Do you have a 3-in-1-out splitter which is intermitantly backing while intermitantly outputting gaps?  If you have, and this bothers you, this mod is for you.
+
+The issues in the default game's splitter happen because the game's splitter contains no buffer, and just outputs when there's space at the front of the belt.  This mod fixes that by shoving items into the output belt when that's possible.  So you might see little gaps coming out of your splitters, and then closing up.
+
+This mod does not change your save file format.  So it is safe to uninstall later if you wish without losing your save.
 
 If you like this mod, please click the thumbs up at the [top of the page](https://dsp.thunderstore.io/package/GreyHak/DSP_Smooth_Splitter/) (next to the Total rating).  That would be a nice thank you for me, and help other people to find a mod you enjoy.
 
