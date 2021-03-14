@@ -1,0 +1,9 @@
+{
+    "name": "DSP_Smooth_Splitter",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/GreyHak/dsp-smooth-splitter",
+    "description": "Smooths the priority output of your splitters.",
+    "dependencies": [
+        "xiaoye97-BepInEx-5.4.5"
+    ]
+}
