@@ -30,7 +30,7 @@ namespace DSPSmoothSplitter
     {
         public const string pluginGuid = "greyhak.dysonsphereprogram.smoothsplitter";
         public const string pluginName = "DSP Smooth Splitter";
-        public const string pluginVersion = "1.0.0";
+        public const string pluginVersion = "1.0.1";
         new internal static ManualLogSource Logger;
         //new internal static BepInEx.Configuration.ConfigFile Config;
         Harmony harmony;
@@ -48,10 +48,10 @@ namespace DSPSmoothSplitter
 
         // At the time of writing, this routine is only used by CargoTraffic.UpdateSplitter
         [HarmonyPostfix, HarmonyPatch(typeof(CargoPath), "TestBlankAtHead")]
-        public static void CargoPath_TestBlankAtHead_Postfix(CargoPath __instance, ref bool __result)
+        public static void CargoPath_TestBlankAtHead_Postfix(CargoPath __instance, ref int __result)
         {
             // All the original function does is:  return this.buffer[9] == 0;
-            if (__result)
+            if (__result != -1)
             {
                 return;
             }
@@ -71,7 +71,7 @@ namespace DSPSmoothSplitter
             List<int> cargoIds = new List<int>();
             int zeroCount = 0;
             // Search for a slotLength worth of zeros.  While searching store all ids to cargoIds so they can be quickly compressed to group the zeros at the beginning.
-            for (int index10 = 0; index10 < cargoSlotLookAhead; index10 += slotLength)
+            for (int index10 = 0; index10 < __instance.bufferLength && index10 < cargoSlotLookAhead; index10 += slotLength)
             {
                 if (__instance.buffer[index10] == 0)
                 {
@@ -93,7 +93,7 @@ namespace DSPSmoothSplitter
                                 Logger.LogError($"Splitter insert upgraded error. index10={index10}, index={index}");
                             }
                             //Logger.LogDebug("Smooth splitter item compression was successful.");
-                            __result = true;
+                            __result = 0;
                             return;
                         }
                     }

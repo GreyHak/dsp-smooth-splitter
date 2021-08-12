@@ -23,5 +23,7 @@ This mod can also be installed using ebkr's [r2modman](https://dsp.thunderstore.
 The source code for this mod is available for download, review and forking on GitHub [here](https://github.com/GreyHak/dsp-smooth-splitter) under the BSD 3 clause license.
 
 ## Change Log
+### v1.0.1
+ - API updated to work with the recent game build.
 ### v1.0.0
  - Initial release.
