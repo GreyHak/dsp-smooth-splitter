@@ -30,7 +30,7 @@ namespace DSPSmoothSplitter
     {
         public const string pluginGuid = "greyhak.dysonsphereprogram.smoothsplitter";
         public const string pluginName = "DSP Smooth Splitter";
-        public const string pluginVersion = "1.0.1";
+        public const string pluginVersion = "1.0.2";
         new internal static ManualLogSource Logger;
         //new internal static BepInEx.Configuration.ConfigFile Config;
         Harmony harmony;
@@ -71,7 +71,8 @@ namespace DSPSmoothSplitter
             List<int> cargoIds = new List<int>();
             int zeroCount = 0;
             // Search for a slotLength worth of zeros.  While searching store all ids to cargoIds so they can be quickly compressed to group the zeros at the beginning.
-            for (int index10 = 0; index10 < __instance.bufferLength && index10 < cargoSlotLookAhead; index10 += slotLength)
+            // -15 will ensure that we don't look into the buffer of the input machine and as a result operate too quicker.
+            for (int index10 = 0; index10 < __instance.bufferLength - 15 && index10 < cargoSlotLookAhead; index10 += slotLength)
             {
                 if (__instance.buffer[index10] == 0)
                 {
