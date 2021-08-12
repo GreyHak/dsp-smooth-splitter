@@ -50,6 +50,7 @@ namespace DSPSmoothSplitter
         [HarmonyPostfix, HarmonyPatch(typeof(CargoPath), "TestBlankAtHead")]
         public static void CargoPath_TestBlankAtHead_Postfix(CargoPath __instance, ref bool __result)
         {
+            // All the original function does is:  return this.buffer[9] == 0;
             if (__result)
             {
                 return;
@@ -69,32 +70,36 @@ namespace DSPSmoothSplitter
 
             List<int> cargoIds = new List<int>();
             int zeroCount = 0;
+            // Search for a slotLength worth of zeros.  While searching store all ids to cargoIds so they can be quickly compressed to group the zeros at the beginning.
             for (int index10 = 0; index10 < cargoSlotLookAhead; index10 += slotLength)
             {
                 if (__instance.buffer[index10] == 0)
                 {
+                    // Find the start of the next item OR determine the current position has sufficient zeros.
                     for (; index10 < __instance.bufferLength && __instance.buffer[index10] == 0; ++index10)
                     {
                         zeroCount++;
-                        if (zeroCount == slotLength)
+                        if (zeroCount == slotLength)  // If the current position has sufficient zeros
                         {
-                            Array.Clear(__instance.buffer, 0, index10);
-                            int index = 4 + slotLength;
-                            foreach (int cargoId_insert in cargoIds)
+                            Array.Clear(__instance.buffer, 0, index10);  // Clear all ids which have been stored into cargoIds
+                            int index = 4 + slotLength;  // Restore the cleared ids starting after space for one whole item
+                            foreach (int cargoId_insert in cargoIds)  // Restore the cleared ids
                             {
                                 __instance.InsertCargoDirect(index, cargoId_insert);
                                 index += slotLength;
                             }
-                            if (index != index10 + 5)
+                            if (index != index10 + 5)  // Ensure the restoration took exactly the amount of space expected
                             {
                                 Logger.LogError($"Splitter insert upgraded error. index10={index10}, index={index}");
                             }
+                            //Logger.LogDebug("Smooth splitter item compression was successful.");
                             __result = true;
                             return;
                         }
                     }
                 }
 
+                // If an error occured, and we didn't actually find an item, and we don't know how to handle this, just exit
                 if (index10 + 9 >= __instance.bufferLength ||
                     __instance.buffer[index10 + 0] != 246 ||
                     __instance.buffer[index10 + 1] != 247 ||
@@ -106,6 +111,7 @@ namespace DSPSmoothSplitter
                     return;
                 }
 
+                // While looking for zeros an item id was found.  Make note of it in cargoIds in case we can compress the ids to make space for a whole item.
                 int cargoId_extract = (int)
                     (__instance.buffer[index10 + 5] - 1 +
                     (__instance.buffer[index10 + 6] - 1) * 100) +
